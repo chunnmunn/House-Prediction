@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction</title>
+    <!-- Add your CSS styles or include external stylesheets here -->
+     <style>
+        body {
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: #f2f2f2;
+}
+
+header {
+    background-color: #000;
+    color: #f2f2f2;
+    padding: 25px;
+    text-align: center;
+    font-size: 2.5em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+main {
+    max-width: 750px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #262626;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #000;
+    color: #f2f2f2;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+form {
+    margin-top: 30px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+select, button {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1.1em;
+    background-color: #333;
+    color: #f2f2f2;
+}
+
+button {
+    background-color: #444;
+    color: #f2f2f2;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+#predictedPrice {
+    margin-top: 25px;
+    font-weight: bold;
+    font-size: 1.3em;
+    text-align: center;
+    padding: 15px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 5px;
+    display: none;
+}
+
+     </style>
+</head>
+
+<body>
+    <header>
+        <h1>House Price Prediction</h1>
+    </header>
+    <main>
+        <p class="welcome-message">Welcome to the House Price Prediction Model!</p>
+        <!-- Form for input fields -->
+        <form id="predictionForm">
+            <label for="beds">Bedrooms:</label>
+            <select id="beds" name="beds">
+                <option value="" disabled selected>Select number of bedrooms</option>
+                {% for bedroom in bedrooms %}
+                <option value="{{ bedroom }}">{{ bedroom }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="baths">Baths:</label>
+            <select id="baths" name="baths">
+                <option value="" disabled selected>Select number of bathrooms</option>
+                {% for bathroom in bathrooms %}
+                <option value="{{ bathroom }}">{{ bathroom }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="size">Size:</label>
+            <select id="size" name="size">
+                <option value="" disabled selected>Select size of the house</option>
+                {% for house_size in sizes %}
+                <option value="{{ house_size }}">{{ house_size }} sqft</option>
+                {% endfor %}
+            </select>
+
+            <label for="zip_code">Zip Code:</label>
+            <select id="zip_code" name="zip_code">
+                <option value="" disabled selected>Select zip code</option>
+                {% for zip_code in zip_codes %}
+                <option value="{{ zip_code }}">{{ zip_code }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Predict Price button -->
+            <button type="button" onclick="sendData()">Predict Price</button>
+
+            <!-- Space for displaying predicted price -->
+            <div id="predictedPrice"></div>
+        </form>
+    </main>
+    <br /><br /><br /><br />
+    <footer>
+        <p>&copy; 2024 House Price Prediction. All rights reserved.</p>
+    </footer>
+    <!-- Add your JavaScript scripts or include external scripts here -->
+    <script>
+        // JavaScript function to fetch options for dropdowns
+        function fetchOptions(endpoint, dropdownId) {
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById(dropdownId);
+                    dropdown.innerHTML = '<option value="" disabled selected>Select an option</option>';
+                    data.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option;
+                        optionElement.textContent = option;
+                        dropdown.appendChild(optionElement);
+                    });
+                });
+        }
+
+        // Fetch options for each dropdown on page load
+        window.onload = function () {
+            fetchOptions('/bedrooms', 'beds');
+            fetchOptions('/bathrooms', 'baths');
+            fetchOptions('/sizes', 'size');
+            fetchOptions('/zip_codes', 'zip_code');
+        };
+
+        // JavaScript function to send data and receive predicted price
+        function sendData() {
+            const form = document.getElementById('predictionForm');
+            const formData = new FormData(form);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(price => {
+                    const priceElement = document.getElementById("predictedPrice");
+                    priceElement.innerHTML = "Price: INR " + price;
+                    priceElement.style.display = "block";
+                });
+        }
+    </script>
+</body>
+
+</html>
